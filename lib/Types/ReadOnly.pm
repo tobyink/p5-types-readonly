@@ -13,7 +13,7 @@ use Type::Utils;
 use Type::Library -base, -declare => qw( ReadOnly Locked );
 
 use Scalar::Util qw( reftype blessed );
-use Hash::Util qw( hashref_locked unlock_hashref lock_ref_keys legal_ref_keys );
+use Hash::Util qw( hash_locked unlock_hashref lock_ref_keys legal_ref_keys );
 
 sub _dclone($) {
 	require Storable;
@@ -85,7 +85,7 @@ declare Locked,
 	pre_check => sub
 	{
 		return unless reftype($_) eq 'HASH';
-		return unless hashref_locked($_);
+		return unless hash_locked(%$_);
 		
 		my $type    = shift;
 		my $wrapped = $type->wrapped;
@@ -102,7 +102,7 @@ declare Locked,
 	{
 		my @r;
 		push @r, qq[Scalar::Util::reftype($_) eq 'HASH'];
-		push @r, qq[Hash::Util::hashref_locked($_)];
+		push @r, qq[Hash::Util::hash_locked(%$_)];
 		
 		my $type    = $_[0];
 		my $wrapped = $type->wrapped;
