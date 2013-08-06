@@ -93,7 +93,7 @@ declare Locked,
 	pre_check => sub
 	{
 		return unless reftype($_) eq 'HASH';
-		return unless &Types::ReadOnly::_hashref_locked($_);
+		return unless &Internals::SvREADONLY($_);
 		
 		my $type    = shift;
 		my $wrapped = $type->wrapped;
@@ -111,7 +111,7 @@ declare Locked,
 	{
 		my @r;
 		push @r, qq[Scalar::Util::reftype($_) eq 'HASH'];
-		push @r, qq[Types::ReadOnly::_hashref_locked($_)];
+		push @r, qq[&Internals::SvREADONLY($_)];
 		
 		my $type    = $_[0];
 		my $wrapped = $type->wrapped;
