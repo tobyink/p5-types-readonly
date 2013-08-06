@@ -165,6 +165,8 @@ with L<Moo>, L<Mouse>, L<Moose>, or none of the above.
 
 This library provides the following type constraints:
 
+=over
+
 =item C<< ReadOnly >>
 
 A type constraint for references to read-only scalars, arrays and
@@ -190,6 +192,8 @@ hashref should be locked with.
 
 This type constraint inherits coercions from its parameter, and
 applies C<lock_ref_keys> to the result.
+
+=back
 
 =head1 BUGS
 
