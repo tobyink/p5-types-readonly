@@ -4,3 +4,9 @@
 	issued  2013-08-06;
 	label   "Developer preview".
 
+`Types-ReadOnly 0.000_02 cpan:TOBYINK`
+	issued  2013-08-06;
+	changeset [
+		item "The version of Hash::Util bundled with pre-5.18 Perls is crap; workarounds aplenty!"^^Change;
+	].
+
