@@ -152,7 +152,44 @@ Types::ReadOnly - type constraints and coercions for read-only data structures a
 
 =head1 SYNOPSIS
 
+   has foo => (is => 'ro', isa => ReadOnly[ArrayRef], coerce => 1);
+
 =head1 DESCRIPTION
+
+This is a type constraint library for write-restricted references.
+
+This module is built with L<Type::Tiny>, which means that you can use it
+with L<Moo>, L<Mouse>, L<Moose>, or none of the above.
+
+=head2 Type Constraints
+
+This library provides the following type constraints:
+
+=item C<< ReadOnly >>
+
+A type constraint for references to read-only scalars, arrays and
+hashes. Values don't necessarily need to be deeply read-only to
+pass the type check.
+
+This type constraint I<< only works when it is parameterized >>.
+
+This type constraint inherits coercions from its parameter, and
+makes the result read-only (deeply).
+
+=item C<< Locked >>
+
+A type constraint for hashrefs with locked keys (see L<Hash::Util>).
+
+This type constraint I<< only works when it is parameterized with 
+C<HashRef> or a hashref-like type constraint >>. For example
+C<< Locked[HashRef] >> or C<< Locked[ Map[ IpAddr, HostName ] ] >>.
+
+When parameterized with a C<Dict> type constraint (see L<Types::Standard>),
+it will use the C<Dict> type as the authoritative list of keys that the
+hashref should be locked with.
+
+This type constraint inherits coercions from its parameter, and
+applies C<lock_ref_keys> to the result.
 
 =head1 BUGS
 
