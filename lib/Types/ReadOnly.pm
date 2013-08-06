@@ -13,7 +13,6 @@ use Type::Utils;
 use Type::Library -base, -declare => qw( ReadOnly Locked );
 
 use Scalar::Util qw( reftype blessed );
-use Hash::Util qw( hash_locked unlock_hashref lock_ref_keys legal_ref_keys );
 
 sub _dclone($) {
 	require Storable;
@@ -80,19 +79,29 @@ my $_FIND_KEYS = sub {
 	\@keys;
 };
 
+# Stolen from Hash::Util 0.15.
+# In earlier versions, of Hash::Util, there is only a hashref_unlocked
+# function, which happens to be very broken. :-/
+sub _hashref_locked
+{
+	my $hash=shift;
+	Internals::SvREADONLY(%$hash);
+}
+
 declare Locked,
 	bless     => 'Type::Tiny::Wrapper',
 	pre_check => sub
 	{
 		return unless reftype($_) eq 'HASH';
-		return unless hash_locked(%$_);
+		return unless &Types::ReadOnly::_hash_unlocked($_);
 		
 		my $type    = shift;
 		my $wrapped = $type->wrapped;
 		
 		if (my $KEYS = $wrapped->$_FIND_KEYS) {
+			require Hash::Util;
 			my $keys  = join "*#*", @$KEYS;
-			my $legal = join "*#*", sort { $a cmp $b } legal_ref_keys($_);
+			my $legal = join "*#*", sort { $a cmp $b } &Hash::Util::legal_keys($_);
 			return if $keys ne $legal;
 		}
 		
@@ -102,30 +111,35 @@ declare Locked,
 	{
 		my @r;
 		push @r, qq[Scalar::Util::reftype($_) eq 'HASH'];
-		push @r, qq[Hash::Util::hash_locked(%$_)];
+		push @r, qq[Types::ReadOnly::_hashref_locked($_)];
 		
 		my $type    = $_[0];
 		my $wrapped = $type->wrapped;
 		
 		if (my $KEYS = $wrapped->$_FIND_KEYS) {
 			require B;
+			require Hash::Util;
 			push @r, B::perlstring(join "*#*", @$KEYS)
-				.qq[ eq join "*#*", sort { \$a cmp \$b } Hash::Util::legal_ref_keys($_)];
+				.qq[ eq join "*#*", sort { \$a cmp \$b } &Hash::Util::legal_keys($_)];
 		}
 		
 		return @r;
 	},
 	post_coerce => sub
 	{
+		require Hash::Util;
+		
 		my $type    = shift;
 		my $wrapped = $type->wrapped;
 		
-		unlock_hashref($_);
-		lock_ref_keys($_, @{ $wrapped->$_FIND_KEYS || [] });
+		&Hash::Util::unlock_hash($_);
+		&Hash::Util::lock_keys($_, @{ $wrapped->$_FIND_KEYS || [] });
 		return $_;
 	},
 	inlined_post_coerce => sub
 	{
+		require Hash::Util;
+		
 		my $type    = shift;
 		my $wrapped = $type->wrapped;
 		
@@ -135,7 +149,7 @@ declare Locked,
 			$qkeys = join q[,], '', map B::perlstring($_), @$KEYS;
 		}
 		
-		return "Hash::Util::unlock_hashref($_); Hash::Util::lock_ref_keys($_ $qkeys); $_;";
+		return "&Hash::Util::unlock_hash($_); &Hash::Util::lock_keys($_ $qkeys); $_;";
 	};
 
 1;

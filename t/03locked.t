@@ -28,7 +28,7 @@ use Test::Fatal;
 
 use Types::Standard -types;
 use Types::ReadOnly -types;
-use Hash::Util qw( hashref_locked lock_ref_keys legal_ref_keys );
+use Hash::Util ();
 
 my $my_hash = HashRef[ Undef ];
 my $my_lock = Locked[ $my_hash ];
@@ -48,8 +48,8 @@ ok(!$foo->is_strictly_a_type_of(Locked), '!$foo->is_strictly_a_type_of(Locked)')
 ok( $foo->is_strictly_a_type_of($my_hash), '$foo->is_strictly_a_type_of($my_hash)');
 
 my $hash1 = { foo => undef };
-my $hash2 = { foo => undef };  lock_ref_keys($hash2);
-my $hash3 = { foo => "xxx" };  lock_ref_keys($hash3);
+my $hash2 = { foo => undef };  &Hash::Util::lock_keys($hash2);
+my $hash3 = { foo => "xxx" };  &Hash::Util::lock_keys($hash3);
 
 like(
 	exception { my $bar = $hash2->{bar} },
@@ -77,9 +77,9 @@ my $locked_dict = Locked[ $my_dict ];
 ok($locked_dict->can_be_inlined, "$locked_dict can be inlined");
 ok($locked_dict->coercion->can_be_inlined, "$locked_dict coercion can be inlined");
 
-my $dict1 = { foo => 1 };  lock_ref_keys($dict1, qw/foo/);
-my $dict2 = { foo => 1 };  lock_ref_keys($dict2, qw/foo bar/);
-my $dict3 = { foo => 1 };  lock_ref_keys($dict3, qw/foo bar baz/);
+my $dict1 = { foo => 1 };  &Hash::Util::lock_keys($dict1, qw/foo/);
+my $dict2 = { foo => 1 };  &Hash::Util::lock_keys($dict2, qw/foo bar/);
+my $dict3 = { foo => 1 };  &Hash::Util::lock_keys($dict3, qw/foo bar baz/);
 
 should_pass($_, $my_dict) for $dict1, $dict2, $dict3;
 should_fail($dict1, $locked_dict);
@@ -87,9 +87,9 @@ should_pass($dict2, $locked_dict);
 should_fail($dict3, $locked_dict);
 
 my $new = $locked_dict->coerce({ foo => 42 });
-ok( hashref_locked($new), 'coercion locks keys' );
+ok( Types::ReadOnly::_hashref_locked($new), 'coercion locks keys' );
 is_deeply(
-	[ sort { $a cmp $b } legal_ref_keys($new) ],
+	[ sort { $a cmp $b } &Hash::Util::legal_keys($new) ],
 	[ qw/ bar foo / ],
 	'coercion locks the correct keys'
 );
@@ -100,9 +100,9 @@ my $Challenge = Locked[ Dict[ a => $Rounded, b => Optional[$Rounded] ] ];
 my $x = $Challenge->coerce({ a => 1.1, b => 2.2 });
 my $y = $Challenge->coerce({ a => 3.3 });
 
-ok( hashref_locked($_), 'coercion locks keys' ) for $x, $y;
+ok( Types::ReadOnly::_hashref_locked($_), 'coercion locks keys' ) for $x, $y;
 is_deeply(
-	[ sort { $a cmp $b } legal_ref_keys($_) ],
+	[ sort { $a cmp $b } &Hash::Util::legal_keys($_) ],
 	[ qw/ a b / ],
 	'coercion locks the correct keys'
 ) for $x, $y;
