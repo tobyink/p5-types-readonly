@@ -93,7 +93,7 @@ declare Locked,
 	pre_check => sub
 	{
 		return unless reftype($_) eq 'HASH';
-		return unless &Types::ReadOnly::_hash_unlocked($_);
+		return unless &Types::ReadOnly::_hashref_locked($_);
 		
 		my $type    = shift;
 		my $wrapped = $type->wrapped;
