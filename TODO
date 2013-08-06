@@ -1,7 +1,4 @@
 Test cases:
-- check works with Moo
-- check works with Moose
-- check works with Mouse
 - check works with Type::Params
 - nested use; e.g.
 	ArrayRef[ Locked[HashRef] ]
