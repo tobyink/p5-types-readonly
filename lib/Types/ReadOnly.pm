@@ -101,7 +101,7 @@ declare Locked,
 		if (my $KEYS = $wrapped->$_FIND_KEYS) {
 			require Hash::Util;
 			my $keys  = join "*#*", @$KEYS;
-			my $legal = join "*#*", sort { $a cmp $b } &Hash::Util::legal_keys($_);
+			my $legal = join "*#*", sort(&Hash::Util::legal_keys($_));
 			return if $keys ne $legal;
 		}
 		
@@ -120,7 +120,7 @@ declare Locked,
 			require B;
 			require Hash::Util;
 			push @r, B::perlstring(join "*#*", @$KEYS)
-				.qq[ eq join "*#*", sort { \$a cmp \$b } &Hash::Util::legal_keys($_)];
+				.qq[ eq join("*#*", sort(&Hash::Util::legal_keys($_)))||''];
 		}
 		
 		return @r;

@@ -45,18 +45,18 @@ sub inline_coercion {
 	my $code = '';
 	if ($pre) {
 		my $tmpvar = sprintf('$__TypeCoercionWrappedTmp%d', ++$counter);
-		$code .= sprintf('my %s = do { %s };', $tmpvar, $pre->($tc, $varname));
+		$code .= sprintf('my %s = do { no warnings; %s };', $tmpvar, $pre->($tc, $varname));
 		$_ = $varname = $tmpvar;
 	}
 	
 	do {
 		my $tmpvar = sprintf('$__TypeCoercionWrappedTmp%d', ++$counter);
-		$code .= sprintf('my %s = do { %s };', $tmpvar, $self->SUPER::inline_coercion($varname));
+		$code .= sprintf('my %s = do { no warnings; %s };', $tmpvar, $self->SUPER::inline_coercion($varname));
 		$_ = $varname = $tmpvar;
 	};
 	
 	if ($post) {
-		$code .= sprintf('%s;', $post->($tc, $varname));
+		$code .= sprintf('do { no warnings; %s };', $post->($tc, $varname));
 	}
 	
 	return $code;
