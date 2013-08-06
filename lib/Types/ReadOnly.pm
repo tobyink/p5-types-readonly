@@ -5,7 +5,7 @@ use warnings;
 package Types::ReadOnly;
 
 our $AUTHORITY = 'cpan:TOBYINK';
-our $VERSION   = '0.000_02';
+our $VERSION   = '0.000_03';
 
 use Type::Tiny 0.022 ();
 use Types::Standard qw( Any Dict );

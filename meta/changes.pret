@@ -10,3 +10,12 @@
 		item "The version of Hash::Util bundled with pre-5.18 Perls is crap; workarounds aplenty!"^^Change;
 	].
 
+`Types-ReadOnly 0.000_03 cpan:TOBYINK`
+	issued  2013-08-06;
+	changeset [
+		item "Include test using Types::ReadOnly with Moo."^^Packaging;
+		item "Include test using Types::ReadOnly with Moose."^^Packaging;
+		item "Include test using Types::ReadOnly with Mouse."^^Packaging;
+		item "Include test using Types::ReadOnly with Type::Params."^^Packaging;
+	].
+
