@@ -53,7 +53,10 @@ my $input = [
 	{ n => 4 },
 ];
 
-my $Complex = ReadOnly[ ArrayRef[ Locked[ Dict[ n => Optional[Int] ] ] ] ];
+my $Complex = (ReadOnly[ ArrayRef[ Locked[ Dict[ n => Optional[Int] ] ] ] ])->create_child_type(
+	name      => 'Complex',
+	coercion  => 1,
+);
 my $output = $Complex->coerce($input);
 should_fail($input, $Complex);
 should_pass($output, $Complex);
