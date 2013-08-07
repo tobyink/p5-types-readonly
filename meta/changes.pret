@@ -19,3 +19,9 @@
 		item "Include test using Types::ReadOnly with Type::Params."^^Packaging;
 	].
 
+`Types-ReadOnly 0.000_04 cpan:TOBYINK`
+	issued  2013-08-07;
+	changeset [
+		item "Tests for some more complex combinations of types."^^Packaging;
+	].
+

@@ -5,7 +5,7 @@ use warnings;
 package Type::Tiny::Wrapper;
 
 our $AUTHORITY = 'cpan:TOBYINK';
-our $VERSION   = '0.000_03';
+our $VERSION   = '0.000_04';
 
 use base 'Type::Tiny';
 use Scalar::Util 'weaken';
