@@ -143,13 +143,13 @@ declare Locked,
 		my $type    = shift;
 		my $wrapped = $type->wrapped;
 		
-		my $qkeys;
+		my $qkeys = '';
 		if (my $KEYS = $wrapped->$_FIND_KEYS) {
 			require B;
 			$qkeys = join q[,], '', map B::perlstring($_), @$KEYS;
 		}
 		
-		return "&Hash::Util::unlock_hash($_); &Hash::Util::lock_keys($_ $qkeys); $_;";
+		"&Hash::Util::unlock_hash($_); &Hash::Util::lock_keys($_ $qkeys); $_;";
 	};
 
 1;

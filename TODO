@@ -1,4 +1,0 @@
-Test cases:
-- nested use; e.g.
-	ArrayRef[ Locked[HashRef] ]
-	ReadOnly[ ArrayRef[ Locked[ Dict[ n => Optional[Int] ] ] ] ]

@@ -59,7 +59,7 @@ sub inline_coercion {
 		$code .= sprintf('do { no warnings; %s };', $post->($tc, $varname));
 	}
 	
-	return $code;
+	"do { no warnings; $code }";
 }
 
 sub can_be_inlined {
