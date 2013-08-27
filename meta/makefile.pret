@@ -3,12 +3,9 @@
 @prefix : <http://ontologi.es/doap-deps#>.
 
 `Types-ReadOnly`
-	perl_version_from    m`Types::ReadOnly`;
-	version_from         m`Types::ReadOnly`;
-	readme_from          m`Types::ReadOnly`;
 	:test-requirement    [ :on "Test::More 0.96"^^:CpanId ];
 	:test-requirement    [ :on "Test::Fatal"^^:CpanId ];
 	:test-requirement    [ :on "Test::Requires"^^:CpanId ];
-	:runtime-requirement [ :on "Type::Tiny"^^:CpanId ];
+	:runtime-requirement [ :on "Type::Tiny 0.022"^^:CpanId ];
 	.
 

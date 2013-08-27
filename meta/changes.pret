@@ -25,3 +25,7 @@
 		item "Tests for some more complex combinations of types."^^Packaging;
 	].
 
+`Types-ReadOnly 0.001 cpan:TOBYINK`
+	issued  2013-08-27;
+	label   "Initial public release".
+

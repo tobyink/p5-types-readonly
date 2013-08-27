@@ -5,7 +5,7 @@ use warnings;
 package Type::Coercion::Wrapped;
 
 our $AUTHORITY = 'cpan:TOBYINK';
-our $VERSION   = '0.000_04';
+our $VERSION   = '0.001';
 
 use base 'Type::Coercion';
 use Scalar::Util 'weaken';
