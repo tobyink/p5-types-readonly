@@ -74,6 +74,7 @@ my $_FIND_KEYS = sub {
 			and $_->parent->strictly_equals(Dict)
 	} $_[0], $_[0]->parents;
 	return unless $dict;
+	return if ref($dict->parameters->[-1]) eq q(HASH);
 	my @keys = sort keys %{ +{ @{ $dict->parameters } } };
 	return unless @keys;
 	\@keys;
@@ -202,7 +203,8 @@ C<< Locked[HashRef] >> or C<< Locked[ Map[ IpAddr, HostName ] ] >>.
 
 When parameterized with a C<Dict> type constraint (see L<Types::Standard>),
 it will use the C<Dict> type as the authoritative list of keys that the
-hashref should be locked with.
+hashref should be locked with, unless the Dict includes a slurpy parameter
+(e.g. C<< Dict[foo => Int, slurpy HashRef[Num]] >>).
 
 This type constraint inherits coercions from its parameter, and
 applies C<lock_ref_keys> to the result.
