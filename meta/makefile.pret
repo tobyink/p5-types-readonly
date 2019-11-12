@@ -6,6 +6,6 @@
 	:test-requirement    [ :on "Test::More 0.96"^^:CpanId ];
 	:test-requirement    [ :on "Test::Fatal"^^:CpanId ];
 	:test-requirement    [ :on "Test::Requires"^^:CpanId ];
-	:runtime-requirement [ :on "Type::Tiny 0.022"^^:CpanId ];
+	:runtime-requirement [ :on "Type::Tiny 1.006000"^^:CpanId ];
 	.
 
