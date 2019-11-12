@@ -33,14 +33,14 @@ use Test::Fatal;
 use Types::Standard -types;
 use Types::ReadOnly -types;
 
-my $SciNum = Locked[ Dict[ mantissa => Num, exponent => Optional[Int] ] ];
-$SciNum->coercion->add_type_coercions(
+my $SciNumUnlocked = Dict->of( mantissa => Num, exponent => Optional[Int] )->plus_coercions(
 	Str, q{do{
 		require Math::BigFloat;
 		my $tmp = 'Math::BigFloat'->new($_);
 		+{ mantissa => $tmp->mantissa->bstr, exponent => $tmp->exponent->bstr };
 	}},
 );
+my $SciNum = Locked->of($SciNumUnlocked);
 
 {
 	package Measurement;

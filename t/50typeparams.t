@@ -66,7 +66,7 @@ like(
 
 like(
 	exception { foo("blam", bar => 42, baz => 666, blam => 999) },
-	qr{^Hash has key 'blam' which is not in the new key set},
+	qr{did not pass type constraint},
 );
 
 done_testing;
