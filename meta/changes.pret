@@ -34,3 +34,10 @@
 	changeset [
 		item "Cope with upcoming changes to Dict in Types::Standard."^^Change;
 	].
+
+`Types-ReadOnly 0.003 cpan:TOBYINK`
+	label   "Fresh start";
+	issued  2019-11-12;
+	changeset [
+		item "Internal changes to Type::Tiny broke this ages ago. But luckily many of the newer features of Type::Tiny allow Types::ReadOnly to be implemented with far less hacky code."^^Change;
+	].
