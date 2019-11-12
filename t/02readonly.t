@@ -47,10 +47,20 @@ my $r = $roHash->coerce({ foo => 1, bar => 2 });
 should_pass($r, $roHash, 'can coerce to ReadOnly');
 is_deeply($r, { foo => 1, bar => 2 }, '... result of coercion has correct deep structure');
 
-my $Rounded = Int->plus_coercions(Num, q{int($_)});
-my $roTuple = ReadOnly[ Tuple[ $Rounded, HashRef ] ];
-my $r2 = $roTuple->coerce([1.1, { foo => 4 }]);
-should_pass($r2, $roTuple, "can coerce to $roTuple");
-is_deeply($r2, [1, { foo => 4}], '... result of coercion has correct deep structure');
+{
+	my $Rounded = Int->plus_coercions(Num, q{int($_)});
+	my $roTuple = ReadOnly[ Tuple[ $Rounded, HashRef ] ];
+	my $r2 = $roTuple->coerce([1.1, { foo => 4 }]);
+	should_pass($r2, $roTuple, "can coerce to $roTuple (testing with string of code)");
+	is_deeply($r2, [1, { foo => 4}], '... result of coercion has correct deep structure');
+}
+
+{
+	my $Rounded = Int->plus_coercions(Num, sub {int($_)});
+	my $roTuple = ReadOnly[ Tuple[ $Rounded, HashRef ] ];
+	my $r2 = $roTuple->coerce([1.1, { foo => 4 }]);
+	should_pass($r2, $roTuple, "can coerce to $roTuple (testing with coderef)");
+	is_deeply($r2, [1, { foo => 4}], '... result of coercion has correct deep structure');
+}
 
 done_testing;

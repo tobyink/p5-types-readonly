@@ -7,9 +7,9 @@ package Types::ReadOnly;
 our $AUTHORITY = 'cpan:TOBYINK';
 our $VERSION   = '0.002';
 
-use Type::Tiny 0.022 ();
+use Type::Tiny 1.006000 ();
+use Type::Coercion ();
 use Types::Standard qw( Any Dict );
-use Type::Utils;
 use Type::Library -base, -declare => qw( ReadOnly Locked );
 
 use Scalar::Util qw( reftype blessed );
@@ -27,7 +27,7 @@ sub _make_readonly {
 	if (my $reftype = reftype $_[0] and not blessed($_[0]) and not &Internals::SvREADONLY($_[0])) {
 		$_[0] = _dclone($_[0]) if !$dont_clone && &Internals::SvREFCNT($_[0]) > 1 && !$skip{$reftype};
 		&Internals::SvREADONLY($_[0], 1);
-		if ($reftype eq 'SCALAR' || $reftype eq 'REF') {
+		if ($reftype eq 'SCALAR' or $reftype eq 'REF') {
 			_make_readonly(${ $_[0] }, 1);
 		}
 		elsif ($reftype eq 'ARRAY') {
@@ -41,8 +41,6 @@ sub _make_readonly {
 	Internals::SvREADONLY($_[0], 1);
 	return;
 }
-
-our %READONLY_REF_TYPES = (HASH => 1, ARRAY => 1, SCALAR => 1, REF => 1);
 
 my $_FIND_KEYS = sub {
 	my ($dict) = grep {
@@ -66,8 +64,68 @@ sub _hashref_locked
 	Internals::SvREADONLY(%$hash);
 }
 
+__PACKAGE__->meta->add_type({
+	name        => 'ReadOnly',
+	parent      => Types::Standard::Ref(),
+	constraint  => sub {
+		my $r = reftype($_);
+		($r eq 'HASH' or $r eq 'ARRAY' or $r eq 'SCALAR' or $r eq 'REF') and &Internals::SvREADONLY($_);
+	},
+	constraint_generator => sub {
+		my ($parameter) = @_ or return $Type::Tiny::parameterize_type;
+		$parameter->compiled_check; # only need this because parent constraint (i.e. ReadOnly) is automatically checked
+	},
+	inlined     => sub {
+		my ($self, $varname) = @_;
+		return (
+			sprintf('do { my $r = Scalar::Util::reftype(%s); $r eq "HASH" or $r eq "ARRAY" or $r eq "SCALAR" or $r eq "REF" }', $varname),
+			sprintf('&Internals::SvREADONLY(%s)', $varname),
+		);
+	},
+	inline_generator => sub {
+		my ($parameter) = @_ or return $Type::Tiny::parameterize_type;
+		return unless $parameter->can_be_inlined;
+		sub {
+			my ($child, $varname) = @_;
+			my $me = $child->parent;
+			return ($me->inlined->($me, $varname), $parameter->inlined->($parameter, $varname));
+		};
+	},
+	coercion => [
+		Types::Standard::Ref(), => 'do { Types::ReadOnly::_make_readonly(my $ro = $_); $ro }',
+	],
+	coercion_generator => sub {
+		my ($me, $child) = @_;
+		my $parameter = $child->type_parameter;
+		my @extra;
+		if ($parameter->has_coercion) {
+			my @map = @{ $parameter->coercion->type_coercion_map };
+			while (@map) {
+				my ($t, $code) = splice @map, 0, 2;
+				if (Types::TypeTiny::CodeLike->check($code)) {
+					push @extra, $t, sub {
+						my $coerced = $code->(@_);
+						Types::ReadOnly::_make_readonly($coerced);
+						$coerced;
+					};
+				}
+				else {
+					push @extra, $t, sprintf('do { my $coerced = %s; Types::ReadOnly::_make_readonly($coerced); $coerced }', $code);
+				}
+			}
+		}
+		bless(
+			{ type_coercion_map => [
+				$parameter => 'do { Types::ReadOnly::_make_readonly(my $ro = $_); $ro }',
+				@extra,
+			] },
+			'Type::Coercion'
+		);
+	},
+});
 
-1;
+__PACKAGE__->meta->make_immutable;
+
 
 __END__
 
@@ -101,8 +159,6 @@ This library provides the following type constraints:
 A type constraint for references to read-only scalars, arrays and
 hashes. Values don't necessarily need to be deeply read-only to
 pass the type check.
-
-This type constraint I<< only works when it is parameterized >>.
 
 This type constraint inherits coercions from its parameter, and
 makes the result read-only (deeply).
