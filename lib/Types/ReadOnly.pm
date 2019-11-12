@@ -149,7 +149,7 @@ __PACKAGE__->meta->add_type({
 	inline_generator => sub {
 		require Hash::Util;
 		my ($parameter) = @_ or return $Type::Tiny::parameterize_type;
-		return unless $parameter->can_be_inlined;		
+		return unless $parameter->can_be_inlined;
 		my $KEYS = $parameter->$_FIND_KEYS;
 		my $keys = join "*#*", @{ $KEYS || [] };
 		sub {
