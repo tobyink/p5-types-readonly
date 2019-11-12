@@ -7,5 +7,6 @@
 	:test-requirement    [ :on "Test::Fatal"^^:CpanId ];
 	:test-requirement    [ :on "Test::Requires"^^:CpanId ];
 	:runtime-requirement [ :on "Type::Tiny 1.006000"^^:CpanId ];
+	:runtime-requirement [ :on "perl 5.008000"^^:CpanId ];
 	.
 
