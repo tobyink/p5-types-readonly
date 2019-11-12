@@ -44,29 +44,6 @@ sub _make_readonly {
 
 our %READONLY_REF_TYPES = (HASH => 1, ARRAY => 1, SCALAR => 1, REF => 1);
 
-declare ReadOnly,
-	bless     => 'Type::Tiny::Wrapper',
-	pre_check => sub
-	{
-		$READONLY_REF_TYPES{reftype($_)} and &Internals::SvREADONLY($_);
-	},
-	inlined_pre_check => sub
-	{
-		return (
-			"\$Types::ReadOnly::READONLY_REF_TYPES{Scalar::Util::reftype($_)}",
-			"&Internals::SvREADONLY($_)",
-		);
-	},
-	post_coerce => sub
-	{
-		_make_readonly($_);
-		return $_;
-	},
-	inlined_post_coerce => sub
-	{
-		"do { Types::ReadOnly::_make_readonly($_); $_ }";
-	};
-
 my $_FIND_KEYS = sub {
 	my ($dict) = grep {
 		$_->is_parameterized
@@ -89,69 +66,6 @@ sub _hashref_locked
 	Internals::SvREADONLY(%$hash);
 }
 
-declare Locked,
-	bless     => 'Type::Tiny::Wrapper',
-	pre_check => sub
-	{
-		return unless reftype($_) eq 'HASH';
-		return unless &Internals::SvREADONLY($_);
-		
-		my $type    = shift;
-		my $wrapped = $type->wrapped;
-		
-		if (my $KEYS = $wrapped->$_FIND_KEYS) {
-			require Hash::Util;
-			my $keys  = join "*#*", @$KEYS;
-			my $legal = join "*#*", sort(&Hash::Util::legal_keys($_));
-			return if $keys ne $legal;
-		}
-		
-		return !!1;
-	},
-	inlined_pre_check => sub
-	{
-		my @r;
-		push @r, qq[Scalar::Util::reftype($_) eq 'HASH'];
-		push @r, qq[&Internals::SvREADONLY($_)];
-		
-		my $type    = $_[0];
-		my $wrapped = $type->wrapped;
-		
-		if (my $KEYS = $wrapped->$_FIND_KEYS) {
-			require B;
-			require Hash::Util;
-			push @r, B::perlstring(join "*#*", @$KEYS)
-				.qq[ eq join("*#*", sort(&Hash::Util::legal_keys($_)))||''];
-		}
-		
-		return @r;
-	},
-	post_coerce => sub
-	{
-		require Hash::Util;
-		
-		my $type    = shift;
-		my $wrapped = $type->wrapped;
-		
-		&Hash::Util::unlock_hash($_);
-		&Hash::Util::lock_keys($_, @{ $wrapped->$_FIND_KEYS || [] });
-		return $_;
-	},
-	inlined_post_coerce => sub
-	{
-		require Hash::Util;
-		
-		my $type    = shift;
-		my $wrapped = $type->wrapped;
-		
-		my $qkeys = '';
-		if (my $KEYS = $wrapped->$_FIND_KEYS) {
-			require B;
-			$qkeys = join q[,], '', map B::perlstring($_), @$KEYS;
-		}
-		
-		"&Hash::Util::unlock_hash($_); &Hash::Util::lock_keys($_ $qkeys); $_;";
-	};
 
 1;
 
